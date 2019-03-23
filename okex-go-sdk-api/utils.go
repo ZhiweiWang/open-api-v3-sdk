@@ -13,7 +13,6 @@ import (
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -22,7 +21,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	
+	jsoniter "github.com/json-iterator/go"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 /*
  signing a message
