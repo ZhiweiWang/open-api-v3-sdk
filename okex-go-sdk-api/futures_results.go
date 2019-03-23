@@ -269,6 +269,7 @@ type FuturesInstrumentsResult struct {
 	Listing         string  `json:"listing"`
 	Delivery        string  `json:"delivery"`
 	TradeIncrement  float64 `json:"trade_increment,string"`
+	Alias           string  `json:"alias"`
 }
 
 type FuturesInstrumentCurrenciesResult struct {
