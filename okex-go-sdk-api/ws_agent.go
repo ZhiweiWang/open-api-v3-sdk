@@ -10,8 +10,9 @@ package okex
 import (
 	"bytes"
 	"compress/flate"
-	"github.com/gorilla/websocket"
 	"io/ioutil"
+
+	"github.com/gorilla/websocket"
 
 	"log"
 	"os"
@@ -90,14 +91,13 @@ func (a *OKWSAgent) Subscribe(channel, filter string, cb ReceivedDataCallback) e
 		return err
 	}
 
-	cbs := a.subMap[st.channel]
+	fullTopic, err := st.ToString()
+	cbs := a.subMap[fullTopic]
 	if cbs == nil {
 		cbs = []ReceivedDataCallback{}
-		a.activeChannels[st.channel] = false
+		a.activeChannels[fullTopic] = false
 	}
 	cbs = append(cbs, cb)
-	a.subMap[st.channel] = cbs
-	fullTopic, err := st.ToString()
 	a.subMap[fullTopic] = cbs
 
 	return nil
@@ -126,7 +126,6 @@ func (a *OKWSAgent) UnSubscribe(channel, filter string) error {
 }
 
 func (a *OKWSAgent) Login(apiKey, passphrase string) error {
-
 	timestamp := EpochTime()
 
 	preHash := PreHashString(timestamp, GET, "/users/self/verify", "")
@@ -203,15 +202,19 @@ func (a *OKWSAgent) handleEventResponse(r interface{}) error {
 }
 
 func (a *OKWSAgent) handleTableResponse(r interface{}) error {
-	tb := ""
+	topic := ""
 	switch r.(type) {
 	case *WSTableResponse:
-		tb = r.(*WSTableResponse).Table
+		res := r.(*WSTableResponse)
+		data := res.Data[0]
+		topic = res.Table + ":" + data.InstrumentId
 	case *WSDepthTableResponse:
-		tb = r.(*WSDepthTableResponse).Table
+		res := r.(*WSDepthTableResponse)
+		data := res.Data[0]
+		topic = res.Table + ":" + data.InstrumentId
 	}
 
-	cbs := a.subMap[tb]
+	cbs := a.subMap[topic]
 	if cbs != nil {
 		for i := 0; i < len(cbs); i++ {
 			cb := cbs[i]

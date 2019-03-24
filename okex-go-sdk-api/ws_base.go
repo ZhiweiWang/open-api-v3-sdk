@@ -22,7 +22,6 @@ type BaseOp struct {
 }
 
 func subscribeOp(sts []*SubscriptionTopic) (op *BaseOp, err error) {
-
 	strArgs := []string{}
 
 	for i := 0; i < len(sts); i++ {
@@ -41,7 +40,6 @@ func subscribeOp(sts []*SubscriptionTopic) (op *BaseOp, err error) {
 }
 
 func unsubscribeOp(sts []*SubscriptionTopic) (op *BaseOp, err error) {
-
 	strArgs := []string{}
 
 	for i := 0; i < len(sts); i++ {
@@ -97,11 +95,16 @@ func (r *WSEventResponse) Valid() bool {
 type WSTableResponse struct {
 	Table  string        `json:"table"`
 	Action string        `json:"action",default:""`
-	Data   []interface{} `json:"data"`
+	Data   []WSTableData `json:"data"`
 }
 
 func (r *WSTableResponse) Valid() bool {
 	return (len(r.Table) > 0 || len(r.Action) > 0) && len(r.Data) > 0
+}
+
+type WSTableData struct {
+	Candle       []interface{} `json:"candle"`
+	InstrumentId string        `json:"instrument_id"`
 }
 
 type WSDepthItem struct {
@@ -113,12 +116,10 @@ type WSDepthItem struct {
 }
 
 func mergeDepths(oldDepths [][4]interface{}, newDepths [][4]interface{}) (*[][4]interface{}, error) {
-
 	mergedDepths := [][4]interface{}{}
 	oldIdx, newIdx := 0, 0
 
 	for oldIdx < len(oldDepths) && newIdx < len(newDepths) {
-
 		oldItem := oldDepths[oldIdx]
 		newItem := newDepths[newIdx]
 
@@ -267,7 +268,6 @@ func (d *WSHotDepths) loadWSDepthTableResponse(r *WSDepthTableResponse) error {
 					crc32BaseBuffer.String(), expectCrc32, r.Data[i].Checksum)
 			}
 		}
-
 	case "update":
 		for i := 0; i < len(r.Data); i++ {
 			newDI := r.Data[i]
@@ -280,7 +280,6 @@ func (d *WSHotDepths) loadWSDepthTableResponse(r *WSDepthTableResponse) error {
 				d.DepthMap[newDI.InstrumentId] = &newDI
 			}
 		}
-
 	default:
 		break
 	}
@@ -299,7 +298,6 @@ func (r *WSErrorResponse) Valid() bool {
 }
 
 func loadResponse(rspMsg []byte) (interface{}, error) {
-
 	//log.Printf("%s", rspMsg)
 
 	evtR := WSEventResponse{}
@@ -331,7 +329,6 @@ func loadResponse(rspMsg []byte) (interface{}, error) {
 	}
 
 	return nil, err
-
 }
 
 type ReceivedDataCallback func(interface{}) error
