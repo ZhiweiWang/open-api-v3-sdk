@@ -119,8 +119,9 @@ func (a *OKWSAgent) UnSubscribe(channel, filter string) error {
 		return err
 	}
 
-	a.subMap[channel] = nil
-	a.activeChannels[channel] = false
+	fullTopic, err := st.ToString()
+	a.subMap[fullTopic] = nil
+	a.activeChannels[fullTopic] = false
 
 	return nil
 }
